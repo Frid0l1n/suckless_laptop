@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Check if monitors are connected and configure them
+if xrandr | grep -q "HDMI-1 connected"; then
+    xrandr --output HDMI-1 --auto --left-of eDP-1
+fi
+if xrandr | grep -q "DP-1 connected"; then
+    xrandr --output DP-1 --auto --left-of eDP-1
+fi
+
+# Start your window manager or desktop environment
+exec dwm

@@ -1,0 +1,2 @@
+#!/bin/bash
+rclone mount PolyBox: /home/nicolas/PolyBox/ --vfs-cache-mode full

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+case "$(printf "Shutdown\nReboot\nSuspend\nLock\nExit dwm\n" | dmenu -l 10)" in
+	"Shutdown") poweroff;;
+	"Reboot") reboot;;
+	"Suspend") systemctl suspend;;
+	"Lock") slock;;
+	"Exit dwm") pkill dwm;;
+	*) exit 1;;
+esac

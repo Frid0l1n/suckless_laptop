@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Set thresholds for battery percentage
+LOW_BATTERY=20
+CRITICAL_BATTERY=5
+FULL_BATTERY=95
+
+# Get the battery percentage and charging status
+battery_percentage=$(cat /sys/class/power_supply/BAT0/capacity)
+charging_status=$(cat /sys/class/power_supply/BAT0/status)
+
+if [ "$charging_status" == "Discharging" ] && [ "$battery_percentage" -le "$CRITICAL_BATTERY" ]; then
+    notify-send -u critical "Battery Critical" "Battery is at $battery_percentage%. Please charge your device."
+elif [ "$charging_status" == "Discharging" ] && [ "$battery_percentage" -le "$LOW_BATTERY" ]; then
+    notify-send -u normal "Battery Low" "Battery is at $battery_percentage%. Consider plugging in your charger."
+elif [ "$charging_status" == "Charging" ] && [ "$battery_percentage" -ge "$FULL_BATTERY" ]; then
+    notify-send -u low "Battery Full" "Battery is at $battery_percentage%. You can unplug the charger."
+fi
+
