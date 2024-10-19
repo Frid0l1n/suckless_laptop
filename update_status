@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Function to get battery status
+get_battery() {
+  local battery_path="/sys/class/power_supply/BAT0"
+  if [[ -e "$battery_path" ]]; then
+    local battery_status=$(cat "$battery_path/status")
+    local battery_capacity=$(cat "$battery_path/capacity")
+    echo "$battery_capacity% ($battery_status)"
+  else
+    echo "Battery information unavailable"
+  fi
+}
+
+# Function to get current time
+get_time() {
+  echo "$(date '+%Y.%m.%d %H:%M:%S')"
+}
+
+# Function to get WLAN connection information
+get_wlan(){
+	echo "$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d ':' -f 2)"
+}
+
+# Function to get weather information from wttr.in
+get_weather() {
+  local weather=$(curl -s 'wttr.in/?format=%C+%t')
+  if [[ -n "$weather" ]]; then
+    echo "Weather: $weather"
+  else
+    echo "Weather information unavailable"
+  fi
+}
+
+# Main loop to update status
+weather_interval=600  # Weather update every 10 minutes (600 seconds)
+weather_last_fetched=0
+
+while true; do
+  current_time=$(date +%s)
+  battery=$(get_battery)
+  time=$(get_time)
+  wlan=$(get_wlan)
+
+  # Update weather every 10 minutes
+  if (( current_time - weather_last_fetched >= weather_interval )); then
+    weather=$(get_weather)
+    weather_last_fetched=$current_time
+  fi
+
+  # Prepare the status line
+  status_line="$weather | $battery | $wlan | $time"
+
+  # Display the status in the appropriate place (e.g., xsetroot)
+  xsetroot -name "$status_line"
+
+  # Sleep for 1 second before the next update
+  sleep 1
+done
+
