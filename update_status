@@ -1,15 +1,28 @@
 #!/bin/bash
 
-# Function to get battery status
 get_battery() {
-  local battery_path="/sys/class/power_supply/BAT0"
-  if [[ -e "$battery_path" ]]; then
-    local battery_status=$(cat "$battery_path/status")
-    local battery_capacity=$(cat "$battery_path/capacity")
-    echo "$battery_capacity% ($battery_status)"
-  else
-    echo "Battery information unavailable"
-  fi
+    local battery_path="/sys/class/power_supply/BAT0"
+    if [[ -e "$battery_path" ]]; then
+        local battery_capacity=$(cat "$battery_path/capacity")
+        local battery_status=$(cat "$battery_path/status")
+
+        # Determine the battery icon based on capacity
+        if [ "$battery_capacity" -ge 80 ]; then
+            battery_icon=""  # Full
+        elif [ "$battery_capacity" -ge 60 ]; then
+            battery_icon=""  # Three-quarters
+        elif [ "$battery_capacity" -ge 40 ]; then
+            battery_icon=""  # Half
+        elif [ "$battery_capacity" -ge 20 ]; then
+            battery_icon=""  # Quarter
+        else
+            battery_icon=""  # Empty
+        fi
+
+        echo "$battery_icon $battery_capacity% ($battery_status)"
+    else
+        echo "Battery information unavailable"
+    fi
 }
 
 # Function to get current time
@@ -24,13 +37,43 @@ get_wlan(){
 
 # Function to get weather information from wttr.in
 get_weather() {
-  local weather=$(curl -s 'wttr.in/?format=%C+%t')
-  if [[ -n "$weather" ]]; then
-    echo "  Weather: $weather"
-  else
-    echo "Weather information unavailable"
-  fi
+    local weather=$(curl -s 'wttr.in/?format=%C+%t')  # Fetch weather condition and temperature
+
+    if [[ -n "$weather" ]]; then
+        local condition=$(echo "$weather" | awk '{print $1}')  # Extract weather condition
+        local temperature=$(echo "$weather" | awk '{print $2}')  # Extract temperature
+
+        # Set weather icon based on condition
+        case $condition in
+            "Clear")
+                weather_icon=""  # Sun icon
+                ;;
+            "Partly")
+                weather_icon=""  # Partly cloudy icon
+                ;;
+            "Cloudy")
+                weather_icon=""  # Cloud icon
+                ;;
+            "Overcast")
+                weather_icon=""  # Overcast cloud icon
+                ;;
+            "Rain")
+                weather_icon=""  # Rain icon
+                ;;
+            "Snow")
+                weather_icon=""  # Snow icon
+                ;;
+            *)
+                weather_icon=""  # Default icon for unknown conditions
+                ;;
+        esac
+
+        echo "$weather_icon $condition $temperature"
+    else
+        echo "Weather information unavailable"
+    fi
 }
+
 
 # Main loop to update status
 weather_interval=600  # Weather update every 10 minutes (600 seconds)
@@ -49,7 +92,7 @@ while true; do
   fi
 
   # Prepare the status line
-  status_line="$weather | $battery |  $wlan |  $time"
+  status_line="$weather |$battery |  $wlan |  $time"
 
   # Display the status in the appropriate place (e.g., xsetroot)
   xsetroot -name "$status_line"
