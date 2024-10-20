@@ -26,7 +26,7 @@ get_wlan(){
 get_weather() {
   local weather=$(curl -s 'wttr.in/?format=%C+%t')
   if [[ -n "$weather" ]]; then
-    echo "Weather: $weather"
+    echo "  Weather: $weather"
   else
     echo "Weather information unavailable"
   fi
@@ -49,7 +49,7 @@ while true; do
   fi
 
   # Prepare the status line
-  status_line="$weather | $battery | $wlan | $time"
+  status_line="$weather | $battery |  $wlan |  $time"
 
   # Display the status in the appropriate place (e.g., xsetroot)
   xsetroot -name "$status_line"
