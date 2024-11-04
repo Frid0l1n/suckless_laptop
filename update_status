@@ -48,6 +48,10 @@ get_weather() {
             "Clear")
                 weather_icon=""  # Sun icon
                 ;;
+	    "Sunny")
+                weather_icon=""  # Sunny
+                ;;
+
             "Partly")
                 weather_icon=""  # Partly cloudy icon
                 ;;
@@ -57,6 +61,13 @@ get_weather() {
             "Overcast")
                 weather_icon=""  # Overcast cloud icon
                 ;;
+	    "mist")
+                weather_icon=""  # Sun mist
+                ;;
+	    "fog")
+                weather_icon=""  # Sun mist
+                ;;
+
             "Rain")
                 weather_icon=""  # Rain icon
                 ;;
