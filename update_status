@@ -25,14 +25,39 @@ get_battery() {
     fi
 }
 
+get_stock_price() {
+    local stock=$1
+    local url="https://www.google.com/finance/quote/$stock"
+    local price=$(curl -s "$url" | grep -oP 'data-last-price="\K[0-9.]+' | head -n 1)
+
+    if [[ -z "$price" ]]; then
+        echo "Error: Could not fetch price for $stock" >&2
+        price=0
+    fi
+
+    echo "$price"
+}
+
+get_total_stock_value() {
+    local swissre=$(get_stock_price "SWX:SREN")
+    local swisslife=$(get_stock_price "SWX:SLHN")
+    local calida=$(get_stock_price "SWX:CALN")
+    local lindt=$(get_stock_price "SWX:LISN")
+    local swatch=$(get_stock_price "SWX:UHR")
+
+    local total=$(echo "$swissre + $swisslife + $calida + $lindt + $swatch" | bc)
+
+    echo "Total stock value: $total"
+}
+
 # Function to get current time
 get_time() {
-  echo "$(date '+%Y.%m.%d %H:%M:%S')"
+    echo "$(date '+%Y.%m.%d %H:%M:%S')"
 }
 
 # Function to get WLAN connection information
-get_wlan(){
-	echo "$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d ':' -f 2)"
+get_wlan() {
+    echo "$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d ':' -f 2)"
 }
 
 # Function to get weather information from wttr.in
@@ -45,29 +70,15 @@ get_weather() {
 
         # Set weather icon based on condition
         case $condition in
-            "Clear")
+            "Clear" | "Sunny")
                 weather_icon=""  # Sun icon
                 ;;
-	    "Sunny")
-                weather_icon=""  # Sunny
-                ;;
-
             "Partly")
                 weather_icon=""  # Partly cloudy icon
                 ;;
-            "Cloudy")
+            "Cloudy" | "Overcast" | "mist" | "fog")
                 weather_icon=""  # Cloud icon
                 ;;
-            "Overcast")
-                weather_icon=""  # Overcast cloud icon
-                ;;
-	    "mist")
-                weather_icon=""  # Sun mist
-                ;;
-	    "fog")
-                weather_icon=""  # Sun mist
-                ;;
-
             "Rain")
                 weather_icon=""  # Rain icon
                 ;;
@@ -85,30 +96,37 @@ get_weather() {
     fi
 }
 
-
 # Main loop to update status
 weather_interval=600  # Weather update every 10 minutes (600 seconds)
 weather_last_fetched=0
+stock_interval=3600   # Stock price update every 60 minutes (3600 seconds)
+stock_last_fetched=0
+stock_value="Fetching stock prices..."
 
 while true; do
-  current_time=$(date +%s)
-  battery=$(get_battery)
-  time=$(get_time)
-  wlan=$(get_wlan)
+    current_time=$(date +%s)
+    battery=$(get_battery)
+    time=$(get_time)
+    wlan=$(get_wlan)
 
-  # Update weather every 10 minutes
-  if (( current_time - weather_last_fetched >= weather_interval )); then
-    weather=$(get_weather)
-    weather_last_fetched=$current_time
-  fi
+    # Update weather every 10 minutes
+    if (( current_time - weather_last_fetched >= weather_interval )); then
+        weather=$(get_weather)
+        weather_last_fetched=$current_time
+    fi
 
-  # Prepare the status line
-  status_line="$weather |$battery |  $wlan |  $time"
+    # Update stock prices every 60 minutes
+    if (( current_time - stock_last_fetched >= stock_interval )); then
+        stock_value=$(get_total_stock_value)
+        stock_last_fetched=$current_time
+    fi
 
-  # Display the status in the appropriate place (e.g., xsetroot)
-  xsetroot -name "$status_line"
+    # Prepare the status line
+    status_line="$weather | $stock_value | $battery |  $wlan |  $time"
 
-  # Sleep for 1 second before the next update
-  sleep 1
+    # Display the status in the appropriate place (e.g., xsetroot)
+    xsetroot -name "$status_line"
+
+    # Sleep for 1 second before the next update
+    sleep 1
 done
-
