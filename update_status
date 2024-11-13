@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Function to get battery status and capacity
 get_battery() {
     local battery_path="/sys/class/power_supply/BAT0"
     if [[ -e "$battery_path" ]]; then
@@ -25,12 +26,13 @@ get_battery() {
     fi
 }
 
+# Function to get stock price from Yahoo Finance
 get_stock_price() {
     local stock=$1
-    local url="https://www.google.com/finance/quote/$stock"
-    local price=$(curl -s "$url" | grep -oP 'data-last-price="\K[0-9.]+' | head -n 1)
+    local url="https://query1.finance.yahoo.com/v8/finance/chart/$stock"
+    local price=$(curl -s "$url" | jq -r '.chart.result[0].meta.regularMarketPrice')
 
-    if [[ -z "$price" ]]; then
+    if [[ -z "$price" || "$price" == "null" ]]; then
         echo "Error: Could not fetch price for $stock" >&2
         price=0
     fi
@@ -38,12 +40,13 @@ get_stock_price() {
     echo "$price"
 }
 
+# Function to calculate total stock value
 get_total_stock_value() {
-    local swissre=$(get_stock_price "SWX:SREN")
-    local swisslife=$(get_stock_price "SWX:SLHN")
-    local calida=$(get_stock_price "SWX:CALN")
-    local lindt=$(get_stock_price "SWX:LISN")
-    local swatch=$(get_stock_price "SWX:UHR")
+    local swissre=$(get_stock_price "SREN.SW")
+    local swisslife=$(get_stock_price "SLHN.SW")
+    local calida=$(get_stock_price "CALN.SW")
+    local lindt=$(get_stock_price "LISN.SW")
+    local swatch=$(get_stock_price "UHR.SW")
 
     local total=$(echo "$swissre + $swisslife + $calida + $lindt + $swatch" | bc)
 
