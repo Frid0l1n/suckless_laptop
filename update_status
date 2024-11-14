@@ -26,33 +26,6 @@ get_battery() {
     fi
 }
 
-# Function to get stock price from Yahoo Finance
-get_stock_price() {
-    local stock=$1
-    local url="https://query1.finance.yahoo.com/v8/finance/chart/$stock"
-    local price=$(curl -s "$url" | jq -r '.chart.result[0].meta.regularMarketPrice')
-
-    if [[ -z "$price" || "$price" == "null" ]]; then
-        echo "Error: Could not fetch price for $stock" >&2
-        price=0
-    fi
-
-    echo "$price"
-}
-
-# Function to calculate total stock value
-get_total_stock_value() {
-    local swissre=$(get_stock_price "SREN.SW")
-    local swisslife=$(get_stock_price "SLHN.SW")
-    local calida=$(get_stock_price "CALN.SW")
-    local lindt=$(get_stock_price "LISN.SW")
-    local swatch=$(get_stock_price "UHR.SW")
-
-    local total=$(echo "$swissre + $swisslife + $calida + $lindt + $swatch" | bc)
-
-    echo "Total stock value: $total"
-}
-
 # Function to get current time
 get_time() {
     echo "$(date '+%Y.%m.%d %H:%M:%S')"
@@ -99,33 +72,30 @@ get_weather() {
     fi
 }
 
+# Function to get brightness level
+get_brightness() {
+    local brightness=$(xbacklight -get | awk '{print int($1)}')
+    echo " $brightness%"
+}
+
 # Main loop to update status
 weather_interval=600  # Weather update every 10 minutes (600 seconds)
 weather_last_fetched=0
-stock_interval=3600   # Stock price update every 60 minutes (3600 seconds)
-stock_last_fetched=0
-stock_value="Fetching stock prices..."
 
 while true; do
     current_time=$(date +%s)
     battery=$(get_battery)
     time=$(get_time)
     wlan=$(get_wlan)
-
+    brightness=$(get_brightness)
     # Update weather every 10 minutes
     if (( current_time - weather_last_fetched >= weather_interval )); then
         weather=$(get_weather)
         weather_last_fetched=$current_time
     fi
 
-    # Update stock prices every 60 minutes
-    if (( current_time - stock_last_fetched >= stock_interval )); then
-        stock_value=$(get_total_stock_value)
-        stock_last_fetched=$current_time
-    fi
-
     # Prepare the status line
-    status_line="$weather | $stock_value | $battery |  $wlan |  $time"
+    status_line="$weather | $battery | $brightness |  $wlan |  $time"
 
     # Display the status in the appropriate place (e.g., xsetroot)
     xsetroot -name "$status_line"
