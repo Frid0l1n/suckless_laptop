@@ -7,17 +7,51 @@ get_battery() {
         local battery_capacity=$(cat "$battery_path/capacity")
         local battery_status=$(cat "$battery_path/status")
 
-        # Determine the battery icon based on capacity
-        if [ "$battery_capacity" -ge 80 ]; then
-            battery_icon=""  # Full
-        elif [ "$battery_capacity" -ge 60 ]; then
-            battery_icon=""  # Three-quarters
-        elif [ "$battery_capacity" -ge 40 ]; then
-            battery_icon=""  # Half
-        elif [ "$battery_capacity" -ge 20 ]; then
-            battery_icon=""  # Quarter
+        # Determine the battery icon based on capacity and status
+        if [ "$battery_status" == "Charging" ]; then
+            if [ "$battery_capacity" -ge 90 ]; then
+                battery_icon=""  # Charging 90%
+            elif [ "$battery_capacity" -ge 80 ]; then
+                battery_icon=""  # Charging 80%
+            elif [ "$battery_capacity" -ge 70 ]; then
+                battery_icon=""  # Charging 70%
+            elif [ "$battery_capacity" -ge 60 ]; then
+                battery_icon=""  # Charging 60%
+            elif [ "$battery_capacity" -ge 50 ]; then
+                battery_icon=""  # Charging 50%
+            elif [ "$battery_capacity" -ge 40 ]; then
+                battery_icon=""  # Charging 40%
+            elif [ "$battery_capacity" -ge 30 ]; then
+                battery_icon=""  # Charging 30%
+            elif [ "$battery_capacity" -ge 20 ]; then
+                battery_icon=""  # Charging 20%
+            elif [ "$battery_capacity" -ge 10 ]; then
+                battery_icon=""  # Charging 10%
+            else
+                battery_icon=""  # Charging 0%
+            fi
         else
-            battery_icon=""  # Empty
+            if [ "$battery_capacity" -ge 90 ]; then
+                battery_icon=""  # 90% - Full
+            elif [ "$battery_capacity" -ge 80 ]; then
+                battery_icon=""  # 80%
+            elif [ "$battery_capacity" -ge 70 ]; then
+                battery_icon=""  # 70%
+            elif [ "$battery_capacity" -ge 60 ]; then
+                battery_icon=""  # 60%
+            elif [ "$battery_capacity" -ge 50 ]; then
+                battery_icon=""  # 50%
+            elif [ "$battery_capacity" -ge 40 ]; then
+                battery_icon=""  # 40%
+            elif [ "$battery_capacity" -ge 30 ]; then
+                battery_icon=""  # 30%
+            elif [ "$battery_capacity" -ge 20 ]; then
+                battery_icon=""  # 20%
+            elif [ "$battery_capacity" -ge 10 ]; then
+                battery_icon=""  # 10%
+            else
+                battery_icon=""  # 0%
+            fi
         fi
 
         echo "$battery_icon $battery_capacity% ($battery_status)"
