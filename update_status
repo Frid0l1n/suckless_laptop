@@ -38,17 +38,17 @@ get_battery() {
             elif [ "$battery_capacity" -ge 70 ]; then
                 battery_icon=""  # 70%
             elif [ "$battery_capacity" -ge 60 ]; then
-                battery_icon=""  # 60%
+                battery_icon=""  # 60%
             elif [ "$battery_capacity" -ge 50 ]; then
-                battery_icon=""  # 50%
+                battery_icon=""  # 50%
             elif [ "$battery_capacity" -ge 40 ]; then
                 battery_icon=""  # 40%
             elif [ "$battery_capacity" -ge 30 ]; then
-                battery_icon=""  # 30%
+                battery_icon= "" # 30%
             elif [ "$battery_capacity" -ge 20 ]; then
-                battery_icon=""  # 20%
+                battery_icon= ""  # 20%
             elif [ "$battery_capacity" -ge 10 ]; then
-                battery_icon=""  # 10%
+                battery_icon=""  # 10%
             else
                 battery_icon=""  # 0%
             fi
